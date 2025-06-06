@@ -105,7 +105,7 @@ public class ThreadPoolMetricsService {
 
         System.out.println("--------------------------------------------------\n");
     }
-    @Scheduled(fixedRate = 3000) // Execute every 3000 milliseconds (3 seconds)
+//    @Scheduled(fixedRate = 3000) // Execute every 3000 milliseconds (3 seconds)
     public void scheduledLogThreadPoolMetrics() {
         logThreadPoolMetrics();
     }
