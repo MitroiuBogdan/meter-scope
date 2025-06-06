@@ -27,8 +27,6 @@ public class ValidationMetricsAspect {
         String operationTag = annotation.tag();
         ExceptionTag[] exceptionTags = annotation.exceptions();
 
-        Timer.Sample sample = Timer.start(meterRegistry);
-
         try {
             return joinPoint.proceed();
         } catch (Throwable ex) {
@@ -43,11 +41,6 @@ public class ValidationMetricsAspect {
                 }
             }
             throw ex; // always propagate
-        } finally {
-            sample.stop(Timer.builder("validation.request.time")
-                    .tag("operation", operationTag)
-                    .description("Time taken to run validation")
-                    .register(meterRegistry));
         }
     }
 }
