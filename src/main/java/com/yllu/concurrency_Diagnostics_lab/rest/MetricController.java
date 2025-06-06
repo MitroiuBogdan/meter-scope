@@ -73,4 +73,19 @@ public class MetricController {
             return ResponseEntity.ok(validationRequest);
         });
     }
+
+    @PostMapping("/timed")
+    public CompletableFuture<ResponseEntity<ValidationRequest>> testTimed(@RequestBody ValidationRequest validationRequest) {
+        return CompletableFuture.supplyAsync(() -> {
+            runAsync(() -> {
+                try {
+                    validationLoopService.testTimed(validationRequest.delay());
+                } catch (Exception e) {
+                    System.out.println("Catch in the controller");
+
+                }
+            });
+            return ResponseEntity.ok(validationRequest);
+        });
+    }
 }
