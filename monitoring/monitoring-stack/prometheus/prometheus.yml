@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s # How frequently to scrape targets
+  evaluation_interval: 15s # How frequently to evaluate rules
+
+scrape_configs:
+  - job_name: 'spring-boot-app' # Name for your Spring Boot application's metrics
+    metrics_path: '/actuator/prometheus' # The Actuator endpoint for Prometheus metrics
+    # Use 'host.docker.internal' to access services running on the Docker host from within a container
+    # This works on Docker Desktop (Mac/Windows).
+    # On Linux, you might need to use the actual IP address of your host machine (e.g., 172.17.0.1)
+    # or ensure your Spring Boot app is in the same Docker network and use its service name.
+    static_configs:
+      - targets: ['host.docker.internal:8080'] # Assuming your Spring Boot app is on port 8080 on the host
+        labels:
+          application: 'my-spring-app' # Custom label for easy filtering in Grafana

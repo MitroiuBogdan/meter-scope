@@ -1,0 +1,43 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # Service for your Spring Boot Application (assuming it's running on the host machine or another container)
+  # If your Spring Boot app is also containerized, you would add its service definition here.
+  # For now, we assume it's accessible at host.docker.internal:8080 (for Docker Desktop on Mac/Windows)
+  # or by its IP address if running on a Linux host/VM.
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090" # Expose Prometheus UI
+    volumes:
+      # Mount the custom Prometheus configuration file
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    # Ensures Prometheus restarts if it stops
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000" # Expose Grafana UI
+    volumes:
+      # Persist Grafana data (dashboards, data sources, etc.)
+      - grafana_data:/var/lib/grafana
+      # Mount the provisioning directory for dashboards
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      # Mount the provisioning directory for data sources (optional, but good practice)
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    # Link to Prometheus service to ensure it starts after Prometheus
+    depends_on:
+      - prometheus
+    # Ensures Grafana restarts if it stops
+    restart: unless-stopped
+
+volumes:
+  grafana_data: {} # Define a named volume for Grafana data persistence

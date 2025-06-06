@@ -1,0 +1,131 @@
+# dashboards/jvm-metrics-dashboard.yaml
+apiVersion: 1
+
+providers:
+  - name: 'JVM Metrics'
+    orgId: 1
+    folder: ''
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards # This path will be mounted from your Docker setup
+      # This path refers to where the actual dashboard JSON file will be located.
+      # We'll put the dashboard definition directly in this YAML for simplicity,
+      # but in a real setup, you might reference a separate JSON file.
+
+# This section defines the dashboard itself.
+# In a real provisioning setup, you'd typically have a separate JSON file for the dashboard,
+# and this YAML would just point to it. For a self-contained example, we embed a simplified JSON.
+# Note: Grafana's native dashboard format is JSON. While this is YAML, the 'dashboard' field
+# would typically contain the full JSON dashboard definition.
+# For simplicity and to fit the YAML request, I'm providing a structure that Grafana expects
+# for provisioning, and will outline the panel structure.
+# For a full, runnable dashboard, you'd export a JSON dashboard from Grafana and embed it here.
+
+dashboards:
+  - name: 'JVM Overview'
+    uid: 'jvm-overview-dashboard' # Unique identifier for the dashboard
+    orgId: 1
+    editable: true
+    version: 1
+    schemaVersion: 16
+    tags: ['jvm', 'spring-boot', 'metrics']
+    timezone: 'browser'
+    title: 'JVM Overview'
+    panels:
+      # Panel 1: JVM Heap Memory Usage
+      - id: 1
+        title: 'JVM Heap Memory Usage'
+        type: 'graph'
+        gridPos: {x: 0, y: 0, w: 12, h: 8}
+        targets:
+          - expr: 'jvm_memory_used_bytes{application="my-spring-app", area="heap"}'
+            legendFormat: 'Used'
+            refId: 'A'
+          - expr: 'jvm_memory_committed_bytes{application="my-spring-app", area="heap"}'
+            legendFormat: 'Committed'
+            refId: 'B'
+          - expr: 'jvm_memory_max_bytes{application="my-spring-app", area="heap"}'
+            legendFormat: 'Max'
+            refId: 'C'
+        yAxes:
+          - format: 'bytes'
+            label: 'Memory'
+          - format: 'short'
+            label: ''
+
+      # Panel 2: JVM Garbage Collection Pauses
+      - id: 2
+        title: 'JVM GC Pause Time (Rate)'
+        type: 'graph'
+        gridPos: {x: 12, y: 0, w: 12, h: 8}
+        targets:
+          - expr: 'sum by (action) (rate(jvm_gc_pause_seconds_sum{application="my-spring-app"}[1m]))'
+            legendFormat: '{{action}}'
+            refId: 'A'
+        yAxes:
+          - format: 's'
+            label: 'Seconds/sec'
+          - format: 'short'
+            label: ''
+
+      # Panel 3: JVM Live Threads
+      - id: 3
+        title: 'JVM Live Threads'
+        type: 'graph'
+        gridPos: {x: 0, y: 8, w: 12, h: 8}
+        targets:
+          - expr: 'jvm_threads_live_threads{application="my-spring-app"}'
+            legendFormat: 'Live'
+            refId: 'A'
+          - expr: 'jvm_threads_daemon_threads{application="my-spring-app"}'
+            legendFormat: 'Daemon'
+            refId: 'B'
+          - expr: 'jvm_threads_peak_threads{application="my-spring-app"}'
+            legendFormat: 'Peak'
+            refId: 'C'
+        yAxes:
+          - format: 'short'
+            label: 'Count'
+          - format: 'short'
+            label: ''
+
+      # Panel 4: CPU Usage
+      - id: 4
+        title: 'CPU Usage'
+        type: 'graph'
+        gridPos: {x: 12, y: 8, w: 12, h: 8}
+        targets:
+          - expr: 'process_cpu_usage{application="my-spring-app"} * 100'
+            legendFormat: 'Process CPU'
+            refId: 'A'
+          - expr: 'system_cpu_usage{application="my-spring-app"} * 100'
+            legendFormat: 'System CPU'
+            refId: 'B'
+          - expr: 'system_load_average_1m{application="my-spring-app"}'
+            legendFormat: 'System Load Avg (1m)'
+            refId: 'C'
+        yAxes:
+          - format: 'percent'
+            label: 'Percentage'
+          - format: 'short'
+            label: ''
+
+      # Panel 5: JVM Class Loading
+      - id: 5
+        title: 'JVM Class Loading'
+        type: 'graph'
+        gridPos: {x: 0, y: 16, w: 12, h: 8}
+        targets:
+          - expr: 'jvm_classes_loaded_classes{application="my-spring-app"}'
+            legendFormat: 'Loaded Classes'
+            refId: 'A'
+          - expr: 'rate(jvm_classes_unloaded_classes_total{application="my-spring-app"}[1m])'
+            legendFormat: 'Unloaded Classes/sec'
+            refId: 'B'
+        yAxes:
+          - format: 'short'
+            label: 'Count'
+          - format: 'short'
+            label: ''
